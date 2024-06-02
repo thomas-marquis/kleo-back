@@ -1,0 +1,9 @@
+gprc:
+  port: 50051
+
+database:
+  host: localhost
+  port: 
+  username: 
+  password: 
+  database: 
