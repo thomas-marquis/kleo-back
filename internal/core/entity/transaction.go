@@ -6,6 +6,6 @@ type Transaction struct {
 	Id      string
 	RawDate time.Time
 	Date    time.Time
-	Amount  float64
+	Amount  float32
 	Label   string
 }
