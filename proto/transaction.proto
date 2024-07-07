@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/thomas-marquis/kleo-back/internal/controller/grpc/generated";
+option java_package = "fr.scalde.thunemanager.data.generated";
+
+message Transaction {
+    string id = 1;
+    float amount = 2;
+    string label = 3;
+    google.protobuf.Timestamp date = 4;
+}
+
+message Filter {
+    google.protobuf.Timestamp start_date = 1;
+    google.protobuf.Timestamp end_date = 2;
+    int32 max_items = 3;
+}
+
+message SearchTransactionRequest {
+    Filter filter = 1;
+    string page_token = 2;
+    int32 page_size = 3;
+}
+
+message TransactionsListResponse {
+    repeated Transaction transactions = 1;
+    string next_page_token = 2;
+}
+
+message GetTransactionByIdRequest {
+    string id = 1;
+}
+
+message GetTransactionByIdRResponse {
+    Transaction transaction = 1;
+}
+
+service TransactionService {
+    rpc SearchTransactions(SearchTransactionRequest) returns (TransactionsListResponse) {}
+    rpc GetTransactionById(GetTransactionByIdRequest) returns (GetTransactionByIdRResponse) {}
+}
