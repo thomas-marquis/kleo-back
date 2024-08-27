@@ -18,122 +18,122 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// TransactionServiceClient is the client API for TransactionService service.
+// KeloAppServiceClient is the client API for KeloAppService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type TransactionServiceClient interface {
-	SearchTransactions(ctx context.Context, in *SearchTransactionRequest, opts ...grpc.CallOption) (*TransactionsListResponse, error)
-	GetTransactionById(ctx context.Context, in *GetTransactionByIdRequest, opts ...grpc.CallOption) (*GetTransactionByIdRResponse, error)
+type KeloAppServiceClient interface {
+	ListTransactionsByUser(ctx context.Context, in *ListTransactionsByUserRequest, opts ...grpc.CallOption) (*TransactionsListResponse, error)
+	GetUserById(ctx context.Context, in *GetByIdRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
 }
 
-type transactionServiceClient struct {
+type keloAppServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewTransactionServiceClient(cc grpc.ClientConnInterface) TransactionServiceClient {
-	return &transactionServiceClient{cc}
+func NewKeloAppServiceClient(cc grpc.ClientConnInterface) KeloAppServiceClient {
+	return &keloAppServiceClient{cc}
 }
 
-func (c *transactionServiceClient) SearchTransactions(ctx context.Context, in *SearchTransactionRequest, opts ...grpc.CallOption) (*TransactionsListResponse, error) {
+func (c *keloAppServiceClient) ListTransactionsByUser(ctx context.Context, in *ListTransactionsByUserRequest, opts ...grpc.CallOption) (*TransactionsListResponse, error) {
 	out := new(TransactionsListResponse)
-	err := c.cc.Invoke(ctx, "/TransactionService/SearchTransactions", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/KeloAppService/ListTransactionsByUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *transactionServiceClient) GetTransactionById(ctx context.Context, in *GetTransactionByIdRequest, opts ...grpc.CallOption) (*GetTransactionByIdRResponse, error) {
-	out := new(GetTransactionByIdRResponse)
-	err := c.cc.Invoke(ctx, "/TransactionService/GetTransactionById", in, out, opts...)
+func (c *keloAppServiceClient) GetUserById(ctx context.Context, in *GetByIdRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
+	out := new(GetUserResponse)
+	err := c.cc.Invoke(ctx, "/KeloAppService/GetUserById", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// TransactionServiceServer is the server API for TransactionService service.
-// All implementations must embed UnimplementedTransactionServiceServer
+// KeloAppServiceServer is the server API for KeloAppService service.
+// All implementations must embed UnimplementedKeloAppServiceServer
 // for forward compatibility
-type TransactionServiceServer interface {
-	SearchTransactions(context.Context, *SearchTransactionRequest) (*TransactionsListResponse, error)
-	GetTransactionById(context.Context, *GetTransactionByIdRequest) (*GetTransactionByIdRResponse, error)
-	mustEmbedUnimplementedTransactionServiceServer()
+type KeloAppServiceServer interface {
+	ListTransactionsByUser(context.Context, *ListTransactionsByUserRequest) (*TransactionsListResponse, error)
+	GetUserById(context.Context, *GetByIdRequest) (*GetUserResponse, error)
+	mustEmbedUnimplementedKeloAppServiceServer()
 }
 
-// UnimplementedTransactionServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedTransactionServiceServer struct {
+// UnimplementedKeloAppServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedKeloAppServiceServer struct {
 }
 
-func (UnimplementedTransactionServiceServer) SearchTransactions(context.Context, *SearchTransactionRequest) (*TransactionsListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchTransactions not implemented")
+func (UnimplementedKeloAppServiceServer) ListTransactionsByUser(context.Context, *ListTransactionsByUserRequest) (*TransactionsListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListTransactionsByUser not implemented")
 }
-func (UnimplementedTransactionServiceServer) GetTransactionById(context.Context, *GetTransactionByIdRequest) (*GetTransactionByIdRResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTransactionById not implemented")
+func (UnimplementedKeloAppServiceServer) GetUserById(context.Context, *GetByIdRequest) (*GetUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserById not implemented")
 }
-func (UnimplementedTransactionServiceServer) mustEmbedUnimplementedTransactionServiceServer() {}
+func (UnimplementedKeloAppServiceServer) mustEmbedUnimplementedKeloAppServiceServer() {}
 
-// UnsafeTransactionServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TransactionServiceServer will
+// UnsafeKeloAppServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to KeloAppServiceServer will
 // result in compilation errors.
-type UnsafeTransactionServiceServer interface {
-	mustEmbedUnimplementedTransactionServiceServer()
+type UnsafeKeloAppServiceServer interface {
+	mustEmbedUnimplementedKeloAppServiceServer()
 }
 
-func RegisterTransactionServiceServer(s grpc.ServiceRegistrar, srv TransactionServiceServer) {
-	s.RegisterService(&TransactionService_ServiceDesc, srv)
+func RegisterKeloAppServiceServer(s grpc.ServiceRegistrar, srv KeloAppServiceServer) {
+	s.RegisterService(&KeloAppService_ServiceDesc, srv)
 }
 
-func _TransactionService_SearchTransactions_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchTransactionRequest)
+func _KeloAppService_ListTransactionsByUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListTransactionsByUserRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TransactionServiceServer).SearchTransactions(ctx, in)
+		return srv.(KeloAppServiceServer).ListTransactionsByUser(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TransactionService/SearchTransactions",
+		FullMethod: "/KeloAppService/ListTransactionsByUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).SearchTransactions(ctx, req.(*SearchTransactionRequest))
+		return srv.(KeloAppServiceServer).ListTransactionsByUser(ctx, req.(*ListTransactionsByUserRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TransactionService_GetTransactionById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTransactionByIdRequest)
+func _KeloAppService_GetUserById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetByIdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(TransactionServiceServer).GetTransactionById(ctx, in)
+		return srv.(KeloAppServiceServer).GetUserById(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/TransactionService/GetTransactionById",
+		FullMethod: "/KeloAppService/GetUserById",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransactionServiceServer).GetTransactionById(ctx, req.(*GetTransactionByIdRequest))
+		return srv.(KeloAppServiceServer).GetUserById(ctx, req.(*GetByIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// TransactionService_ServiceDesc is the grpc.ServiceDesc for TransactionService service.
+// KeloAppService_ServiceDesc is the grpc.ServiceDesc for KeloAppService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var TransactionService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "TransactionService",
-	HandlerType: (*TransactionServiceServer)(nil),
+var KeloAppService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "KeloAppService",
+	HandlerType: (*KeloAppServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SearchTransactions",
-			Handler:    _TransactionService_SearchTransactions_Handler,
+			MethodName: "ListTransactionsByUser",
+			Handler:    _KeloAppService_ListTransactionsByUser_Handler,
 		},
 		{
-			MethodName: "GetTransactionById",
-			Handler:    _TransactionService_GetTransactionById_Handler,
+			MethodName: "GetUserById",
+			Handler:    _KeloAppService_GetUserById_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
