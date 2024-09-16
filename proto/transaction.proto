@@ -5,9 +5,11 @@ import "google/protobuf/timestamp.proto";
 option go_package = "github.com/thomas-marquis/kleo-back/internal/controller/grpc/generated";
 option java_package = "fr.scalde.kleo.data.generated";
 
-
-message MovmentType {
-    string value = 1;
+enum MovmentType {
+    BASE_INCOME = 0;
+    BASE_EXPENSE = 1;
+    BASE_TRANSFER = 2;
+    BASE_SAVING = 3;
 }
 
 message SubCategory {
@@ -21,6 +23,7 @@ message Category {
     string label = 2;
     SubCategory sub_category = 3;
     string description = 4;
+    string id = 5;
 }
 
 message User {
@@ -57,7 +60,7 @@ message GetByIdRequest {
 
 message TransactionsListResponse {
     repeated Transaction transactions = 1;
-    string next_page_token = 2;
+    bool has_next = 2;
 }
 
 message GetUserResponse {

@@ -19,11 +19,12 @@ type RawTransaction struct {
 	Amount   float64
 }
 
-func NewRawTransaction(label string, date time.Time) *RawTransaction {
+func NewRawTransaction(label string, date time.Time, amount float64) *RawTransaction {
 	return &RawTransaction{
 		ID:       RawTransactionId(uuid.New()),
 		Label:    label,
 		Date:     date,
+		Amount:   amount,
 		Metadata: make(map[string]interface{}),
 	}
 }

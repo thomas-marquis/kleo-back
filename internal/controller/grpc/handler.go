@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/thomas-marquis/kleo-back/internal/application"
 	"github.com/thomas-marquis/kleo-back/internal/controller/grpc/generated"
+	"github.com/thomas-marquis/kleo-back/internal/controller/grpc/mapping"
 	"github.com/thomas-marquis/kleo-back/internal/domain"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -34,24 +35,15 @@ func (s *KleoServer) ListTransactionsByUser(ctx context.Context, req *generated.
 		return nil, status.Errorf(codes.Internal, "an error occurred when fetching transactions: %v", err)
 	}
 
-	var transactionsList []*generated.Transaction
+	var transactionsList = make([]*generated.Transaction, len(transactions))
 	for _, transaction := range transactions {
-		var allocations = make(map[string]float32)
-		for userId, ratio := range transaction.Allocations {
-			allocations[userId.String()] = float32(ratio)
-		}
+		allocations := mapping.FromTransactionToAllocation(*transaction)
 
 		var category *generated.Category
 		if transaction.Category != nil {
-			category = &generated.Category{
-				Label:       transaction.Category.Label,
-				Value:       transaction.Category.Value,
-				Description: transaction.Category.Description,
-				SubCategory: &generated.SubCategory{
-					Label:       transaction.Category.SubCategory.Label,
-					Value:       transaction.Category.SubCategory.Value,
-					MovmentType: &generated.MovmentType{Value: transaction.Category.SubCategory.MovmentType.String()},
-				},
+			category, err = mapping.FromCategory(*transaction.Category)
+			if err != nil {
+				return nil, err
 			}
 		}
 

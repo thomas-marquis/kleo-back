@@ -2,9 +2,11 @@ package application
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/thomas-marquis/kleo-back/internal/domain"
+	"github.com/thomas-marquis/kleo-back/internal/infrastructure"
 )
 
 type TransactionService struct {
@@ -28,8 +30,11 @@ func (s *TransactionService) AllocateToUser(ctx context.Context, transaction *do
 }
 
 func (s *TransactionService) ListUserTransactions(ctx context.Context, userId domain.UserId, limit int, offset int) ([]*domain.Transaction, error) {
-	transactions, err := s.repo.FindByUserId(ctx, userId)
+	transactions, err := s.repo.FindByUserId(ctx, userId, limit, offset)
 	if err != nil {
+		if errors.Is(err, infrastructure.ErrDataNotFound) {
+			return nil, domain.ErrTransactionNotFound
+		}
 		return nil, fmt.Errorf("an error occurred when fetching transactions: %w", err)
 	}
 	return transactions, nil

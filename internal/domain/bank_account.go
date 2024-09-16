@@ -5,16 +5,18 @@ import "github.com/google/uuid"
 type BankAccountId uuid.UUID
 
 type BankAccount struct {
-	ID    BankAccountId
-	Label string
-	Users map[UserId]*User
+	ID       BankAccountId
+	Label    string
+	Users    map[UserId]*User
+	IsActive bool
 }
 
 func NewBankAccount(label string) *BankAccount {
 	return &BankAccount{
-		ID:    BankAccountId(uuid.New()),
-		Label: label,
-		Users: make(map[UserId]*User),
+		ID:       BankAccountId(uuid.New()),
+		Label:    label,
+		Users:    make(map[UserId]*User),
+		IsActive: true,
 	}
 }
 

@@ -40,18 +40,18 @@ func (m *MockTransactionRepository) EXPECT() *MockTransactionRepositoryMockRecor
 }
 
 // FindByUserId mocks base method.
-func (m *MockTransactionRepository) FindByUserId(arg0 context.Context, arg1 domain.UserId) ([]*domain.Transaction, error) {
+func (m *MockTransactionRepository) FindByUserId(arg0 context.Context, arg1 domain.UserId, arg2, arg3 int) ([]*domain.Transaction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByUserId", arg0, arg1)
+	ret := m.ctrl.Call(m, "FindByUserId", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].([]*domain.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByUserId indicates an expected call of FindByUserId.
-func (mr *MockTransactionRepositoryMockRecorder) FindByUserId(arg0, arg1 any) *gomock.Call {
+func (mr *MockTransactionRepositoryMockRecorder) FindByUserId(arg0, arg1, arg2, arg3 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUserId", reflect.TypeOf((*MockTransactionRepository)(nil).FindByUserId), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUserId", reflect.TypeOf((*MockTransactionRepository)(nil).FindByUserId), arg0, arg1, arg2, arg3)
 }
 
 // Save mocks base method.
@@ -66,4 +66,18 @@ func (m *MockTransactionRepository) Save(arg0 context.Context, arg1 *domain.Tran
 func (mr *MockTransactionRepositoryMockRecorder) Save(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockTransactionRepository)(nil).Save), arg0, arg1)
+}
+
+// SaveRaw mocks base method.
+func (m *MockTransactionRepository) SaveRaw(arg0 context.Context, arg1 *domain.RawTransaction) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveRaw", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveRaw indicates an expected call of SaveRaw.
+func (mr *MockTransactionRepositoryMockRecorder) SaveRaw(arg0, arg1 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveRaw", reflect.TypeOf((*MockTransactionRepository)(nil).SaveRaw), arg0, arg1)
 }

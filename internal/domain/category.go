@@ -1,6 +1,10 @@
 package domain
 
-import "github.com/google/uuid"
+import (
+	"errors"
+
+	"github.com/google/uuid"
+)
 
 type MovmentType string
 
@@ -27,7 +31,27 @@ var (
 	NonRequiredExpense      = SubCategory{"non_required_expense", BaseExpense, "Dépense facultative"}
 	Income                  = SubCategory{"income", BaseIncome, "Revenu"}
 	Investment              = SubCategory{"investment", BaseSaving, "Investissement"}
+	Transfer                = SubCategory{"transfer", BaseTransfer, "Transfert"}
 )
+
+func GetSubCategoryFromValue(value string) (SubCategory, error) {
+	switch value {
+	case "required_fixed_expense":
+		return RequiredFixedExpense, nil
+	case "required_variable_expense":
+		return RequiredVariableExpense, nil
+	case "non_required_expense":
+		return NonRequiredExpense, nil
+	case "income":
+		return Income, nil
+	case "investment":
+		return Investment, nil
+	case "transfer":
+		return Transfer, nil
+	default:
+		return SubCategory{}, errors.New("invalid sub category value")
+	}
+}
 
 type CategoryId uuid.UUID
 
@@ -41,4 +65,14 @@ type Category struct {
 	Label       string
 	Description string
 	SubCategory SubCategory
+}
+
+func NewCategory(value, label, description string, subCategory SubCategory) *Category {
+	return &Category{
+		ID:          CategoryId(uuid.New()),
+		Value:       value,
+		Label:       label,
+		Description: description,
+		SubCategory: subCategory,
+	}
 }

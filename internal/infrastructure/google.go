@@ -8,6 +8,9 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/thomas-marquis/kleo-back/internal/domain"
 	"golang.org/x/oauth2"
@@ -15,6 +18,10 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 	"gopkg.in/yaml.v3"
+)
+
+var (
+	categoryNameMetaKey = "categoryName"
 )
 
 type accountConfig struct {
@@ -39,6 +46,15 @@ type legacyInitConfig struct {
 		Name  string `yaml:"name"`
 		Email string `yaml:"email"`
 	} `yaml:"users"`
+	CategoryMap []categoryMapConfig `yaml:"categoryMap"`
+}
+
+type categoryMapConfig struct {
+	OldLabel         string `yaml:"oldLabel"`
+	NewLabel         string `yaml:"newLabel"`
+	Value            string `yaml:"value"`
+	Description      string `yaml:"description"`
+	SubCategoryValue string `yaml:"subCategory"`
 }
 
 type GoogleLegacyRepository struct {
@@ -91,7 +107,7 @@ func NewGoogleLegacyRepository(sheetsSvc *sheets.Service) *GoogleLegacyRepositor
 }
 
 func (r *GoogleLegacyRepository) GetBankAccounts(ctx context.Context) ([]*domain.BankAccount, error) {
-	var accounts []*domain.BankAccount = make([]*domain.BankAccount, len(r.config.Accounts))
+	var accounts = make([]*domain.BankAccount, len(r.config.Accounts))
 	for _, acc := range r.accountsStore {
 		accounts = append(accounts, acc)
 	}
@@ -109,132 +125,47 @@ func (r *GoogleLegacyRepository) GetRawTransactionsByAccountId(ctx context.Conte
 	if err != nil {
 		return nil, fmt.Errorf("error while retrieving values from sheet: %s", err.Error())
 	}
-	var rawTr []*domain.RawTransaction
+	var rawTransactions []*domain.RawTransaction = make([]*domain.RawTransaction, 0, len(*values))
 
 	fmt.Println("#First lines:")
 	for i, row := range *values {
-		// 	trTags := make([]entities.Tag, 0)
-		//
 		if i <= 3 {
 			fmt.Println(row)
 		}
-		//
-		// 	// bank date
-		// 	rawDate := row[param.DateColumnIndex].(string)
-		// 	if strings.TrimSpace(rawDate) == "" {
-		// 		continue
-		// 	}
-		//
-		// 	dateFormats := [3]string{"02/01/2006", "02/1/2006", "02/01/06"}
-		// 	var t time.Time
-		// 	var err error
-		// 	for _, format := range dateFormats {
-		// 		t, err = time.Parse(format, rawDate)
-		// 		if err == nil {
-		// 			break
-		// 		}
-		// 	}
-		// 	if err != nil {
-		// 		return nil, fmt.Errorf("error while parsing date: %s", err.Error())
-		// 	}
-		//
-		// 	a, err := getFloatValueFromRow(row, param.AmountColumnIndex)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		//
-		// 	// allocation
-		// 	var allocs []entities.Allocation
-		// 	if param.DefaultAllocation != (entities.Allocation{}) {
-		// 		allocs = []entities.Allocation{param.DefaultAllocation}
-		// 	} else {
-		// 		allocs = make([]entities.Allocation, 0, len(param.AllocationColIdx))
-		// 		for user, colIdx := range param.AllocationColIdx {
-		// 			rate, err := getFloatValueFromRow(row, colIdx)
-		// 			if err != nil {
-		// 				return nil, err
-		// 			}
-		//
-		// 			allocs = append(allocs, entities.Allocation{
-		// 				User:      user,
-		// 				Rate:      float32(rate),
-		// 				Household: OurHousehold,
-		// 			})
-		// 		}
-		// 	}
-		//
-		// 	// tags
-		// 	for _, colIdx := range param.TagsColsIdx {
-		// 		var tagLabel string
-		// 		if len(row) <= colIdx {
-		// 			tagLabel = ""
-		// 		} else {
-		// 			tagLabel = row[colIdx].(string)
-		// 			tagLabel = strings.TrimSpace(tagLabel)
-		// 		}
-		// 		if tagLabel == "" {
-		// 			continue
-		// 		}
-		//
-		// 		var (
-		// 			tag *entities.Tag
-		// 			ok  bool
-		// 		)
-		// 		_, ok = s.tagMap[tagLabel]
-		// 		if !ok {
-		// 			tag = &entities.Tag{
-		// 				Label: tagLabel,
-		// 			}
-		// 			logger.Printf("\tSaving new tag '%s'", tagLabel)
-		// 			createdTag, err := s.qualifyingService.CreateTag(tag.Label, tag.Description, *OurHousehold)
-		// 			if err != nil {
-		// 				return nil, err
-		// 			}
-		// 			s.tagMap[tagLabel] = &createdTag
-		// 		}
-		// 		trTags = append(trTags, *s.tagMap[tagLabel])
-		// 	}
-		//
-		// 	// build raw transaction
-		// 	newRawTr := entities.RawTransaction{
-		// 		Account: *param.Account,
-		// 		Date:    t,
-		// 		Amount:  a,
-		// 		Label:   row[param.LabelColumnIndex].(string),
-		// 	}
-		// 	rawTr = append(rawTr, &newRawTr)
-		//
-		// 	// category
-		// 	var categoryLabel string
-		// 	if len(row) <= param.CategoryColIdx {
-		// 		categoryLabel = ""
-		// 	} else {
-		// 		categoryLabel = row[param.CategoryColIdx].(string)
-		// 		categoryLabel = strings.TrimSpace(categoryLabel)
-		// 	}
-		// 	if categoryLabel != "" {
-		// 		cat, ok := s.categMap[categoryLabel]
-		// 		if !ok {
-		// 			return nil, fmt.Errorf("unknown category label: %s", categoryLabel)
-		// 		}
-		// 		s.initRepository.AddCategory(newRawTr, *cat)
-		// 	}
-		//
-		// 	// handle taggging
-		// 	s.initRepository.AddTags(newRawTr, trTags)
-		//
-		// 	// handle allocations
-		// 	s.initRepository.AddAllocations(newRawTr, allocs)
-		// }
-		//
-		// logger.Println("#First parsed raw transactions:")
-		// for i, tr := range rawTr {
-		// 	if i <= 3 {
-		// 		logger.Println(tr)
-		// 	}
+
+		// bank date
+		rawDate := row[accCfg.DateColumnIndex].(string)
+		if strings.TrimSpace(rawDate) == "" {
+			continue
+		}
+
+		dateFormats := [3]string{"02/01/2006", "02/1/2006", "02/01/06"}
+		var (
+			t   time.Time
+			err error
+		)
+		for _, format := range dateFormats {
+			t, err = time.Parse(format, rawDate)
+			if err == nil {
+				break
+			}
+		}
+		if err != nil {
+			return nil, fmt.Errorf("error while parsing date: %s", err.Error())
+		}
+
+		a, err := getFloatValueFromRow(row, accCfg.AmountColumnIndex)
+		if err != nil {
+			return nil, err
+		}
+
+		label := row[accCfg.LabelColumnIndex].(string)
+
+		rawTransaction := domain.NewRawTransaction(label, t, a)
+		rawTransactions = append(rawTransactions, rawTransaction)
 	}
 
-	return rawTr, nil
+	return rawTransactions, nil
 }
 
 func (r *GoogleLegacyRepository) GetCategoryByOldLabel(ctx context.Context, oldLabel string) (*domain.Category, error) {
@@ -242,12 +173,21 @@ func (r *GoogleLegacyRepository) GetCategoryByOldLabel(ctx context.Context, oldL
 }
 
 func (r *GoogleLegacyRepository) GetDateParseRegexpByAccountId(ctx context.Context, accountID domain.BankAccountId) (regexp.Regexp, error) {
-
-	return nil, nil
+	accCfg, ok := r.accountConfigs[accountID]
+	if !ok {
+		return regexp.Regexp{}, fmt.Errorf("account not found")
+	}
+	reg := regexp.MustCompile(accCfg.DateParseRegexp)
+	return *reg, nil
 }
 
 func (r *GoogleLegacyRepository) GetCategoryFromMetadata(ctx context.Context, metadata map[string]interface{}) (*domain.Category, error) {
-	return nil, nil
+	// catName, ok := metadata[categoryNameMetaKey]
+	// if !ok {
+	// 	return nil, fmt.Errorf("category not found in metadata")
+	// }
+	cat := &domain.Category{}
+	return cat, nil
 }
 
 func (r *GoogleLegacyRepository) getUsers() ([]*domain.User, error) {
@@ -366,4 +306,21 @@ func loadConfig() (*legacyInitConfig, error) {
 	cfg := &legacyInitConfig{}
 	err = yaml.NewDecoder(f).Decode(cfg)
 	return cfg, err
+}
+
+// Returns a float value from a row, handling the case where the value is empty or badly formatted
+func getFloatValueFromRow(row []interface{}, col int) (float64, error) {
+	value := row[col].(string)
+	value = strings.ReplaceAll(value, ",", ".")
+	value = strings.TrimSpace(value)
+	value = strings.ReplaceAll(value, " ", "")
+	value = strings.ReplaceAll(value, "\u202f", "")
+	if value == "" {
+		value = "0.0"
+	}
+	f, err := strconv.ParseFloat(value, 32)
+	if err != nil {
+		return 0, fmt.Errorf("error while parsing amount %s: %s", value, err.Error())
+	}
+	return f, nil
 }
