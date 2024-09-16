@@ -1,4 +1,4 @@
-package ui
+package views
 
 import (
 	"fmt"
@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/thomas-marquis/kleo-back/desktop/app"
+	"github.com/thomas-marquis/kleo-back/desktop/ui/components"
 	apptheme "github.com/thomas-marquis/kleo-back/desktop/ui/theme"
 	"github.com/thomas-marquis/kleo-back/internal/domain"
 )
@@ -227,5 +228,11 @@ func GetTransactionListView(ctx *app.AppContext) *fyne.Container {
 		}
 	}))
 
-	return c
+	return container.NewBorder(
+		nil, nil,
+		components.MakeMenubar(ctx),
+		nil,
+		c,
+	)
+
 }

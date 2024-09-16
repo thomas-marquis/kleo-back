@@ -5,22 +5,23 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"github.com/thomas-marquis/kleo-back/desktop/ui/components/navigation"
 	"github.com/thomas-marquis/kleo-back/desktop/ui/viewmodel"
 )
 
 type kleoApp struct {
 	ctx       *AppContext
-	veiws     map[string]func(*AppContext) *fyne.Container
-	startView string
+	veiws     map[navigation.Route]func(*AppContext) *fyne.Container
+	startView navigation.Route
 }
 
-func New(views map[string]func(*AppContext) *fyne.Container, startView string) *kleoApp {
+func New(views map[navigation.Route]func(*AppContext) *fyne.Container, initialView navigation.Route) *kleoApp {
 	a := app.New()
 	w := a.NewWindow("Kl€o")
 
 	vm := viewmodel.New()
-	ctx := NewContext(vm, w)
-	return &kleoApp{ctx, views, startView}
+	ctx := NewContext(vm, w, initialView, views)
+	return &kleoApp{ctx, views, initialView}
 }
 
 func (a *kleoApp) Start() error {
